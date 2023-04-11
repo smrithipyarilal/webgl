@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in  vec4 aPosition;
+in  vec4 aColor;
+uniform mat4 u_xformMatrix;
+uniform vec4 translation;
+uniform mat4 uModelView;
+uniform mat4 uProjection;
+out vec4 vColor;
+
+uniform vec3 uTheta;
+
+void main()
+{
+    // Compute the sines and cosines of theta for each of
+    //   the three axes in one computation.
+    vec3 angles = radians(uTheta);
+    vec3 c = cos(angles);
+    vec3 s = sin(angles);
+
+    // Remember: these matrices are column-major
+    mat4 rx = mat4(1.0,  0.0,  0.0, 0.0,
+		    0.0,  c.x,  s.x, 0.0,
+		    0.0, -s.x,  c.x, 0.0,
+		    0.0,  0.0,  0.0, 1.0);
+
+    mat4 ry = mat4(c.y, 0.0, -s.y, 0.0,
+		    0.0, 1.0,  0.0, 0.0,
+		    s.y, 0.0,  c.y, 0.0,
+		    0.0, 0.0,  0.0, 1.0);
+
+
+    mat4 rz = mat4(c.z, s.z, 0.0, 0.0,
+		    -s.z,  c.z, 0.0, 0.0,
+		    0.0,  0.0, 1.0, 0.0,
+		    0.0,  0.0, 0.0, 1.0);
+
+    vColor = aColor;
+    gl_Position = (uProjection *uModelView * u_xformMatrix * rz * ry * rx * aPosition) + translation;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in vec4 vColor;
+out vec4 fColor;
+
+void
+main()
+{
+    fColor = vColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MVnew.js"></script>
+<script type="text/javascript" src="app.js"></script>
+
+<body>
+<div class="parent" style="display: flex; gap:50px;">
+<canvas id="gl-canvas" width="512" height="512" style = "margin:0px;">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas> 
+<div class="instructions" style = "margin:0px;">
+    <b>Instructions</b>
+    <br>
+    'R' - increase radius <br>
+    'r' - decrease radius <br>
+    'H' - increase height <br>
+    'h' - decrease height <br>
+    'left arrow key' - rotate left <br>
+    'right arrow key' - rotate right <br>
+    <br>
+    Key inputs for reset - 
+    <br>
+    'esc' - Reset <br>
+    <br>
+    </div>
+</div>
+<br>
+<label for="transformation">Choose a transformation:</label>
+  <select name="transformation" onchange="stateFunction()" id="transformation">
+    <option value="" disabled selected>Select your option</option>
+    <option value="parallel">parallel</option>
+    <option value="perspective">perspective</option>
+  </select>
+  
+
+
+
+<!-- <button id= "xButton">Rotate X</button>
+<button id= "yButton">Rotate Y</button>
+<button id= "zButton">Rotate Z</button> -->
+
+</body>
+</html>
